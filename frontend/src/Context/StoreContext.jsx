@@ -6,7 +6,7 @@ export const StoreContext = createContext(null);
 const StoreContextProvider = (props) => {
 
     axios.default.withCredentials = true;
-    const url = "https://food-del-backend-3pfs.onrender.com"
+    const url = "https://food-del-backend-3pfs.onrender.com/api"
     const [food_list, setFoodList] = useState([]);
     const [cartItems, setCartItems] = useState({});
     const [token, setToken] = useState("")
