@@ -6,7 +6,7 @@ export const StoreContext = createContext(null);
 const StoreContextProvider = (props) => {
 
     axios.default.withCredentials = true;
-    const url = "https://food-del-taupe-alpha.vercel.app/"
+    const url = "https://food-del-taupe-alpha.vercel.app"
     const [food_list, setFoodList] = useState([]);
     const [cartItems, setCartItems] = useState({});
     const [token, setToken] = useState("")
