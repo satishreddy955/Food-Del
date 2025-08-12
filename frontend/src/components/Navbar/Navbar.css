@@ -1,12 +1,18 @@
 .navbar {
-    padding: 20px 0px;
+    padding: 20px 4%;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .navbar .logo {
     width: 150px;
+    cursor: pointer;
 }
 
 .navbar-menu {
@@ -15,11 +21,21 @@
     gap: 20px;
     color: #49557E;
     font-size: 18px;
+    font-weight: 500;
+}
+
+.navbar-menu li {
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.navbar-menu li:hover {
+    color: #FF4C24;
 }
 
 .navbar-menu .active {
     padding-bottom: 2px;
-    border-bottom: 2px solid #49557E;
+    border-bottom: 2px solid #FF4C24;
 }
 
 .navbar-right {
@@ -28,18 +44,18 @@
     gap: 40px;
 }
 
-.navbar-search-icon{
-position: relative;
+.navbar-search-icon {
+    position: relative;
 }
 
-.navbar-search-icon .dot{
+.navbar-search-icon .dot {
     position: absolute;
     min-width: 10px;
     min-height: 10px;
     background-color: #FF4C24;
-    border-radius: 5px;
-    top: -8px;
-    right: -8px;
+    border-radius: 50%;
+    top: -6px;
+    right: -6px;
 }
 
 .navbar-right button {
@@ -50,36 +66,41 @@ position: relative;
     padding: 10px 30px;
     border-radius: 50px;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.3s ease;
 }
 
 .navbar-right button:hover {
     background: #fff4f2;
 }
 
-.navbar-profile{
+.navbar-profile {
     position: relative;
-
 }
-.navbar-profile-dropdown{
+
+.navbar-profile-dropdown {
     position: absolute;
     display: none;
     right: 0;
-    z-index: 1;
+    z-index: 10;
 }
-.navbar-profile-dropdown li{
+
+.navbar-profile-dropdown li {
     display: flex;
     align-items: center;
     gap: 10px;
     cursor: pointer;
+    transition: color 0.2s ease;
 }
-.navbar-profile-dropdown img{
+
+.navbar-profile-dropdown img {
     width: 20px;
 }
-.navbar-profile-dropdown li:hover{
+
+.navbar-profile-dropdown li:hover {
     color: #FF4C24;
 }
-.navbar-profile:hover .navbar-profile-dropdown{
+
+.navbar-profile:hover .navbar-profile-dropdown {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -90,29 +111,28 @@ position: relative;
     outline: 2px solid white;
     list-style: none;
 }
-.navbar-profile hr{
+
+.navbar-profile hr {
     background-color: gray;
     height: 1px;
     border: none;
 }
+
+/* Responsive Breakpoints */
 @media (max-width:1050px) {
     .navbar .logo {
         width: 140px;
     }
-
     .navbar-menu {
         gap: 20px;
         font-size: 17px;
     }
-
     .navbar-right {
         gap: 30px;
     }
-
     .navbar-right img {
         width: 22px;
     }
-
     .navbar-right button {
         padding: 8px 25px;
     }
@@ -122,20 +142,16 @@ position: relative;
     .navbar .logo {
         width: 120px;
     }
-
     .navbar-menu {
         gap: 15px;
         font-size: 16px;
     }
-
     .navbar-right {
         gap: 20px;
     }
-
     .navbar-right img {
         width: 20px;
     }
-
     .navbar-right button {
         font-size: 15px;
         padding: 7px 20px;
