@@ -1,12 +1,46 @@
-.navbar{
+.navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 4%;
+    background-color: #fff; /* Optional for better visibility */
 }
-.navbar .logo{
-    width: max(10%,80px);
+
+.navbar .logo {
+    width: max(10%, 80px);
+    height: auto;
 }
-.navbar .profile{
+
+.navbar .profile {
     width: 40px;
+    height: auto;
+    border-radius: 50%; /* Optional for circular profile images */
+}
+
+/* Tablet screens */
+@media (max-width: 900px) {
+    .navbar {
+        padding: 6px 3%;
+    }
+    .navbar .logo {
+        width: 70px;
+    }
+    .navbar .profile {
+        width: 35px;
+    }
+}
+
+/* Mobile screens */
+@media (max-width: 600px) {
+    .navbar {
+        flex-direction: column;
+        gap: 5px;
+        padding: 8px 2%;
+    }
+    .navbar .logo {
+        width: 60px;
+    }
+    .navbar .profile {
+        width: 32px;
+    }
 }
