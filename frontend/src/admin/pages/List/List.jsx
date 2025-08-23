@@ -112,7 +112,6 @@ const List = () => {
             <p>{item.category}</p>
             <p>{currency}{item.price}</p>
             <div style={{ display: "flex", gap: "10px" }}>
-              <button className='cursor edit-btn' onClick={() => editFood(item)}>Edit</button>
               <button className='cursor delete-btn' onClick={() => removeFood(item._id)}>Remove</button>
             </div>
           </div>
