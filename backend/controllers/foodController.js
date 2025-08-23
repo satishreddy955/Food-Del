@@ -1,5 +1,5 @@
 import foodModel from "../models/foodModel.js";
-import fs from 'fs';
+import fs from "fs";
 
 // all food list
 const listFood = async (req, res) => {
@@ -7,15 +7,15 @@ const listFood = async (req, res) => {
     const foods = await foodModel.find({});
     res.json({ success: true, data: foods });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    console.error(error);
+    res.json({ success: false, message: "Error fetching foods" });
   }
 };
 
 // add food
 const addFood = async (req, res) => {
   try {
-    let image_filename = `${req.file.filename}`;
+    const image_filename = req.file?.filename || null;
     const food = new foodModel({
       name: req.body.name,
       description: req.body.description,
@@ -27,8 +27,8 @@ const addFood = async (req, res) => {
     await food.save();
     res.json({ success: true, message: "Food Added" });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    console.error(error);
+    res.json({ success: false, message: "Error adding food" });
   }
 };
 
@@ -36,12 +36,19 @@ const addFood = async (req, res) => {
 const removeFood = async (req, res) => {
   try {
     const food = await foodModel.findById(req.body.id);
-    fs.unlink(`uploads/${food.image}`, () => {});
+    if (!food) {
+      return res.json({ success: false, message: "Food not found" });
+    }
+
+    if (food.image) {
+      fs.unlink(`uploads/${food.image}`, () => {});
+    }
     await foodModel.findByIdAndDelete(req.body.id);
+
     res.json({ success: true, message: "Food Removed" });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    console.error(error);
+    res.json({ success: false, message: "Error removing food" });
   }
 };
 
@@ -49,27 +56,32 @@ const removeFood = async (req, res) => {
 const editFood = async (req, res) => {
   try {
     const { id, name, category, price } = req.body;
-    const updateData = { name, category, price };
+
+    // build update object dynamically
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (category) updateData.category = category;
+    if (price) updateData.price = price;
 
     if (req.file) {
-      // delete old image
-      const oldFood = await foodModel.findById(id);
-      if (oldFood?.image) {
-        fs.unlink(`uploads/${oldFood.image}`, () => {});
-      }
       updateData.image = req.file.filename;
     }
 
-    const updatedFood = await foodModel.findByIdAndUpdate(id, updateData, { new: true });
+    const oldFood = await foodModel.findByIdAndUpdate(id, updateData, { new: true });
 
-    if (!updatedFood) {
+    if (!oldFood) {
       return res.json({ success: false, message: "Food not found" });
     }
 
-    res.json({ success: true, message: "Food updated successfully", data: updatedFood });
+    // delete old image only if a new one was uploaded
+    if (req.file && oldFood.image) {
+      fs.unlink(`uploads/${oldFood.image}`, () => {});
+    }
+
+    res.json({ success: true, message: "Food updated successfully", data: oldFood });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error updating food" });
+    console.error(error);
+    res.json({ success: false, message: "Error updating food", error: error.message });
   }
 };
 
