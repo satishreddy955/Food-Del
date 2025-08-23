@@ -73,20 +73,11 @@ const List = () => {
       if (response.data.success) {
         toast.success(response.data.message);
 
-        // ✅ Update the list state directly
+        // ✅ Replace the updated food in state using backend response
+        const updatedFood = response.data.data;
         setList((prevList) =>
           prevList.map((item) =>
-            item._id === selectedFood
-              ? {
-                  ...item,
-                  name: editForm.name,
-                  category: editForm.category,
-                  price: editForm.price,
-                  image: editForm.image
-                    ? response.data.updatedImage || item.image
-                    : item.image,
-                }
-              : item
+            item._id === updatedFood._id ? updatedFood : item
           )
         );
 
