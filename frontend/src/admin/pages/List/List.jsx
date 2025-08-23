@@ -9,12 +9,13 @@ const List = () => {
   const [selectedFood, setSelectedFood] = useState(null);
   const [editForm, setEditForm] = useState({
     name: "",
+    description: "",
     category: "",
     price: "",
     image: null
   });
 
-  // Fetch food list
+  // ✅ Fetch all foods
   const fetchList = async () => {
     try {
       const response = await axios.get(`${url}/api/food/list`);
@@ -24,11 +25,11 @@ const List = () => {
         toast.error("Error fetching list");
       }
     } catch (error) {
-      toast.error("Error fetching list");
+      toast.error("Failed to fetch list");
     }
   };
 
-  // Delete food
+  // ✅ Remove food
   const removeFood = async (foodId) => {
     try {
       const response = await axios.post(`${url}/api/food/remove`, { id: foodId });
@@ -39,35 +40,34 @@ const List = () => {
         toast.error("Error deleting item");
       }
     } catch (error) {
-      toast.error("Error deleting item");
+      toast.error("Delete failed");
     }
   };
 
-  // Open edit form
+  // ✅ Open edit form
   const editFood = (food) => {
     setSelectedFood(food._id);
     setEditForm({
-      name: food.name || "",
-      category: food.category || "",
-      price: food.price || "",
-      image: null // reset image field
+      name: food.name,
+      description: food.description || "",
+      category: food.category,
+      price: food.price,
+      image: null // reset for new upload
     });
   };
 
-  // Update food
+  // ✅ Update food
   const updateFood = async () => {
     try {
       const formData = new FormData();
       formData.append("id", selectedFood);
+      formData.append("name", editForm.name);
+      formData.append("description", editForm.description);
+      formData.append("category", editForm.category);
+      formData.append("price", editForm.price);
 
-      // Append only non-empty values
-      if (editForm.name.trim() !== "") formData.append("name", editForm.name);
-      if (editForm.category.trim() !== "") formData.append("category", editForm.category);
-      if (editForm.price !== "" && !isNaN(editForm.price)) {
-        formData.append("price", editForm.price);
-      }
       if (editForm.image) {
-        formData.append("image", editForm.image);
+        formData.append("image", editForm.image); // only append if a new image is selected
       }
 
       const response = await axios.post(`${url}/api/food/edit`, formData, {
@@ -79,7 +79,7 @@ const List = () => {
         setSelectedFood(null);
         await fetchList();
       } else {
-        toast.error(response.data.message || "Error updating food");
+        toast.error("Error updating food");
       }
     } catch (error) {
       toast.error("Update failed");
@@ -103,7 +103,7 @@ const List = () => {
         </div>
         {list.map((item, index) => (
           <div key={index} className='list-table-format'>
-            <img src={`${url}/images/${item.image}`} alt={item.name} />
+            <img src={`${url}/images/` + item.image} alt="" />
             <p>{item.name}</p>
             <p>{item.category}</p>
             <p>{currency}{item.price}</p>
@@ -115,7 +115,7 @@ const List = () => {
         ))}
       </div>
 
-      {/* Edit Form */}
+      {/* ✅ Edit Form */}
       {selectedFood && (
         <div className="edit-form">
           <h3>Edit Food</h3>
@@ -124,6 +124,11 @@ const List = () => {
             placeholder="Name"
             value={editForm.name}
             onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+          />
+          <textarea
+            placeholder="Description"
+            value={editForm.description}
+            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
           />
           <input
             type="text"
@@ -143,7 +148,7 @@ const List = () => {
             onChange={(e) => setEditForm({ ...editForm, image: e.target.files[0] })}
           />
           <div style={{ marginTop: "10px" }}>
-            <button onClick={updateFood} style={{ marginRight:"10px" }}>Save</button>
+            <button onClick={updateFood} style={{marginRight:"10px"}}>Save</button>
             <button onClick={() => setSelectedFood(null)}>Cancel</button>
           </div>
         </div>
