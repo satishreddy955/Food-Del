@@ -55,32 +55,32 @@ const removeFood = async (req, res) => {
 // edit food
 const editFood = async (req, res) => {
   try {
-    const { id, name, category, price } = req.body;
+    const { id } = req.body;
 
-    // build update object dynamically
+    // Build update object dynamically
     const updateData = {};
-    if (name) updateData.name = name;
-    if (category) updateData.category = category;
-    if (price) updateData.price = price;
+    if (req.body.name && req.body.name.trim() !== "") updateData.name = req.body.name;
+    if (req.body.category && req.body.category.trim() !== "") updateData.category = req.body.category;
+    if (req.body.price && req.body.price.trim() !== "") updateData.price = req.body.price;
 
+    // Handle new image
     if (req.file) {
+      const oldFood = await foodModel.findById(id);
+      if (oldFood?.image) {
+        fs.unlink(`uploads/${oldFood.image}`, () => {});
+      }
       updateData.image = req.file.filename;
     }
 
-    const oldFood = await foodModel.findByIdAndUpdate(id, updateData, { new: true });
+    const updatedFood = await foodModel.findByIdAndUpdate(id, updateData, { new: true });
 
-    if (!oldFood) {
+    if (!updatedFood) {
       return res.json({ success: false, message: "Food not found" });
     }
 
-    // delete old image only if a new one was uploaded
-    if (req.file && oldFood.image) {
-      fs.unlink(`uploads/${oldFood.image}`, () => {});
-    }
-
-    res.json({ success: true, message: "Food updated successfully", data: oldFood });
+    return res.json({ success: true, message: "Food updated successfully", data: updatedFood });
   } catch (error) {
-    console.error(error);
+    console.error("Update error:", error);
     res.json({ success: false, message: "Error updating food", error: error.message });
   }
 };
