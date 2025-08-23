@@ -14,44 +14,60 @@ const List = () => {
     image: null
   });
 
+  // Fetch food list
   const fetchList = async () => {
-    const response = await axios.get(`${url}/api/food/list`);
-    if (response.data.success) {
-      setList(response.data.data);
-    } else {
+    try {
+      const response = await axios.get(`${url}/api/food/list`);
+      if (response.data.success) {
+        setList(response.data.data);
+      } else {
+        toast.error("Error fetching list");
+      }
+    } catch (error) {
       toast.error("Error fetching list");
     }
   };
 
+  // Delete food
   const removeFood = async (foodId) => {
-    const response = await axios.post(`${url}/api/food/remove`, { id: foodId });
-    await fetchList();
-    if (response.data.success) {
-      toast.success(response.data.message);
-    } else {
+    try {
+      const response = await axios.post(`${url}/api/food/remove`, { id: foodId });
+      await fetchList();
+      if (response.data.success) {
+        toast.success(response.data.message);
+      } else {
+        toast.error("Error deleting item");
+      }
+    } catch (error) {
       toast.error("Error deleting item");
     }
   };
 
+  // Open edit form
   const editFood = (food) => {
     setSelectedFood(food._id);
     setEditForm({
-      name: food.name,
-      category: food.category,
-      price: food.price,
-      image: null // reset for new upload
+      name: food.name || "",
+      category: food.category || "",
+      price: food.price || "",
+      image: null // reset image field
     });
   };
 
+  // Update food
   const updateFood = async () => {
     try {
       const formData = new FormData();
       formData.append("id", selectedFood);
-      formData.append("name", editForm.name);
-      formData.append("category", editForm.category);
-      formData.append("price", editForm.price);
+
+      // Append only non-empty values
+      if (editForm.name.trim() !== "") formData.append("name", editForm.name);
+      if (editForm.category.trim() !== "") formData.append("category", editForm.category);
+      if (editForm.price !== "" && !isNaN(editForm.price)) {
+        formData.append("price", editForm.price);
+      }
       if (editForm.image) {
-        formData.append("image", editForm.image); // only append if a new image is selected
+        formData.append("image", editForm.image);
       }
 
       const response = await axios.post(`${url}/api/food/edit`, formData, {
@@ -63,7 +79,7 @@ const List = () => {
         setSelectedFood(null);
         await fetchList();
       } else {
-        toast.error("Error updating food");
+        toast.error(response.data.message || "Error updating food");
       }
     } catch (error) {
       toast.error("Update failed");
@@ -87,7 +103,7 @@ const List = () => {
         </div>
         {list.map((item, index) => (
           <div key={index} className='list-table-format'>
-            <img src={`${url}/images/` + item.image} alt="" />
+            <img src={`${url}/images/${item.image}`} alt={item.name} />
             <p>{item.name}</p>
             <p>{item.category}</p>
             <p>{currency}{item.price}</p>
@@ -127,7 +143,7 @@ const List = () => {
             onChange={(e) => setEditForm({ ...editForm, image: e.target.files[0] })}
           />
           <div style={{ marginTop: "10px" }}>
-            <button onClick={updateFood} style={{marginRight:"10px"}}>Save</button>
+            <button onClick={updateFood} style={{ marginRight:"10px" }}>Save</button>
             <button onClick={() => setSelectedFood(null)}>Cancel</button>
           </div>
         </div>
