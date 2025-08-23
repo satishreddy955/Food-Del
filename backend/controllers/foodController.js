@@ -1,21 +1,22 @@
 import foodModel from "../models/foodModel.js";
 import fs from "fs";
 
-// all food list
+// ✅ Get all foods
 const listFood = async (req, res) => {
   try {
     const foods = await foodModel.find({});
-    res.json({ success: true, data: foods });
+    return res.json({ success: true, data: foods });
   } catch (error) {
-    console.error(error);
-    res.json({ success: false, message: "Error fetching foods" });
+    console.error("List error:", error);
+    return res.status(500).json({ success: false, message: "Error fetching foods" });
   }
 };
 
-// add food
+// ✅ Add food
 const addFood = async (req, res) => {
   try {
     const image_filename = req.file?.filename || null;
+
     const food = new foodModel({
       name: req.body.name,
       description: req.body.description,
@@ -25,14 +26,14 @@ const addFood = async (req, res) => {
     });
 
     await food.save();
-    res.json({ success: true, message: "Food Added" });
+    return res.json({ success: true, message: "Food added successfully" });
   } catch (error) {
-    console.error(error);
-    res.json({ success: false, message: "Error adding food" });
+    console.error("Add error:", error);
+    return res.status(500).json({ success: false, message: "Error adding food" });
   }
 };
 
-// delete food
+// ✅ Remove food
 const removeFood = async (req, res) => {
   try {
     const food = await foodModel.findById(req.body.id);
@@ -41,47 +42,56 @@ const removeFood = async (req, res) => {
     }
 
     if (food.image) {
-      fs.unlink(`uploads/${food.image}`, () => {});
+      fs.unlink(`uploads/${food.image}`, (err) => {
+        if (err) console.error("Failed to delete old image:", err);
+      });
     }
-    await foodModel.findByIdAndDelete(req.body.id);
 
-    res.json({ success: true, message: "Food Removed" });
+    await foodModel.findByIdAndDelete(req.body.id);
+    return res.json({ success: true, message: "Food removed successfully" });
   } catch (error) {
-    console.error(error);
-    res.json({ success: false, message: "Error removing food" });
+    console.error("Remove error:", error);
+    return res.status(500).json({ success: false, message: "Error removing food" });
   }
 };
 
-// edit food
+// ✅ Edit food
 const editFood = async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id, name, description, category, price } = req.body;
+
+    // Make sure food exists
+    const oldFood = await foodModel.findById(id);
+    if (!oldFood) {
+      return res.json({ success: false, message: "Food not found" });
+    }
 
     // Build update object dynamically
     const updateData = {};
-    if (req.body.name && req.body.name.trim() !== "") updateData.name = req.body.name;
-    if (req.body.category && req.body.category.trim() !== "") updateData.category = req.body.category;
-    if (req.body.price && req.body.price.trim() !== "") updateData.price = req.body.price;
+    if (name && name.trim() !== "") updateData.name = name;
+    if (description && description.trim() !== "") updateData.description = description;
+    if (category && category.trim() !== "") updateData.category = category;
+    if (price !== undefined && price !== "") updateData.price = price;
 
-    // Handle new image
+    // Handle new image upload
     if (req.file) {
-      const oldFood = await foodModel.findById(id);
-      if (oldFood?.image) {
-        fs.unlink(`uploads/${oldFood.image}`, () => {});
+      if (oldFood.image) {
+        fs.unlink(`uploads/${oldFood.image}`, (err) => {
+          if (err) console.error("Failed to delete old image:", err);
+        });
       }
       updateData.image = req.file.filename;
     }
 
-    const updatedFood = await foodModel.findByIdAndUpdate(id, updateData, { new: true });
-
-    if (!updatedFood) {
-      return res.json({ success: false, message: "Food not found" });
-    }
+    const updatedFood = await foodModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     return res.json({ success: true, message: "Food updated successfully", data: updatedFood });
   } catch (error) {
     console.error("Update error:", error);
-    res.json({ success: false, message: "Error updating food", error: error.message });
+    return res.status(500).json({ success: false, message: "Error updating food", error: error.message });
   }
 };
 
